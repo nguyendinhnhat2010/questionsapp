@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:questionsapp/screens/question_list.dart';
 
 class Quizz extends StatefulWidget {
   const Quizz({Key? key}) : super(key: key);
@@ -9,48 +10,41 @@ class Quizz extends StatefulWidget {
 }
 
 class _QuizzState extends State<Quizz> {
-  int counter = 10;
   int score = 0;
-  final random = Random();
+  Color btnColor = Colors.primaries[Random().nextInt(Colors.primaries.length)];
 
-  List<String> listImage = [];
-  List<String> optionsPig = [];
-  List<String> optionsBird = [];
-  List<String> optionsCat = [];
-  List<String> optionsDinasour = [];
-  List<String> optionsElephant = [];
-  List<String> optionsGoat = [];
-  List<String> optionsLion = [];
-  List<String> optionsMonkey = [];
-  List<String> optionsTiger = [];
-  List<String> optionsZebra = [];
-  String text = "";
-  @override
-  void initState() {
-    listImage = [
-      "assets/images/pig.png",
-      "assets/images/bird.png",
-      "assets/images/cat.png",
-      "assets/images/dinasour.png",
-      "assets/images/elephant.png",
-      "assets/images/goat.png",
-      "assets/images/lion.png",
-      "assets/images/monkey.png",
-      "assets/images/tiger.png",
-      "assets/images/zebra.png"
-    ];
-    optionsPig = ["Dog", "Pig", "Cat", "Monkey"];
-    optionsBird = ["Dog", "Pig", "Bird", "Monkey"];
-    optionsCat = ["Dog", "Cat", "Dinasour", "Monkey"];
-    optionsDinasour = ["Dinasour", "Pig", "Cat", "Monkey"];
-    optionsElephant = ["Dog", "Pig", "Cat", "Elephant"];
-    optionsGoat = ["Dog", "Pig", "Goat", "Monkey"];
-    optionsLion = ["Dog", "Lion", "Cat", "Monkey"];
-    optionsMonkey = ["Dog", "Pig", "Cat", "Monkey"];
-    optionsTiger = ["Tiger", "Pig", "Cat", "Monkey"];
-    optionsZebra = ["Dog", "Zebra", "Cat", "Monkey"];
-    text = optionsBird.toString();
-    super.initState();
+  bool isPressed = false;
+  Color trueAnswer = Colors.green;
+  Color falseAnswer = Colors.red;
+
+  PageController _controller = PageController(initialPage: 0);
+
+  showAlertDialog(BuildContext context) {
+    // Create button
+    Widget okButton = ElevatedButton(
+      child: const Text("OK"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+
+    // Create AlertDialog
+    AlertDialog alert = AlertDialog(
+      backgroundColor: Colors.white,
+      title: const Text("Score"),
+      content: Text("Your score is: $score"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
@@ -63,58 +57,120 @@ class _QuizzState extends State<Quizz> {
           child: Text("Flutter Interacitivy"),
         ),
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: Padding(
+        padding: const EdgeInsets.all(10.0),
+        child: PageView.builder(
+          controller: _controller,
+          onPageChanged: (Page) {
+            setState(() {
+              isPressed = false;
+            });
+          },
+          itemCount: questions.length,
+          itemBuilder: (context, index) {
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Time: " + counter.toString(),
-                  style: const TextStyle(fontSize: 20, color: Colors.black),
+                  "Question ${index + 1}/${questions.length}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 28.0,
+                    color: Colors.black,
+                  ),
                 ),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Score: " + score.toString(),
-                  style: const TextStyle(fontSize: 20, color: Colors.black),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Score: " + score.toString(),
+                      style: const TextStyle(fontSize: 20, color: Colors.black),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            Row(
-              children: [
                 Expanded(
-                  child: Image.asset(listImage[0]),
-                ),
-              ],
-            ),
-            for (int i = 0; i < 4; i++)
-              Expanded(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints.expand(),
-                  child: Container(
-                    margin:
-                        const EdgeInsets.only(bottom: 10, left: 10, right: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.primaries[
-                                random.nextInt(Colors.primaries.length)]
-                            [random.nextInt(9) * 100],
-                      ),
-                      onPressed: () {},
-                      child: Text(
-                        optionsPig[i],
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
+                  flex: 3,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints.expand(),
+                    child: Container(
+                      child: Image.asset(questions[index].image!),
                     ),
                   ),
                 ),
-              )
-          ],
+                for (int i = 0; i < questions[index].answer!.length; i++)
+                  Expanded(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints.expand(),
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                            bottom: 10, left: 10, right: 10),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            primary: isPressed
+                                ? questions[index]
+                                        .answer!
+                                        .entries
+                                        .toList()[i]
+                                        .value
+                                    ? trueAnswer
+                                    : falseAnswer
+                                : btnColor,
+                          ),
+                          onPressed: isPressed
+                              ? () {}
+                              : () {
+                                  setState(() {
+                                    isPressed = true;
+                                    if (questions[index]
+                                            .answer!
+                                            .entries
+                                            .toList()[i]
+                                            .value ==
+                                        isPressed) {
+                                      score = score + 10;
+                                    }
+                                  });
+                                },
+                          child: Text(
+                            questions[index].answer!.keys.toList()[i],
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                Expanded(
+                    child: ConstrainedBox(
+                  constraints: const BoxConstraints.expand(),
+                  child: Container(
+                      child: OutlinedButton(
+                    onPressed: isPressed
+                        ? index + 1 == questions.length
+                            ? () {
+                                showAlertDialog(context);
+                              }
+                            : () {
+                                _controller.nextPage(
+                                    duration: const Duration(milliseconds: 750),
+                                    curve: Curves.ease);
+                              }
+                        : null,
+                    child: Text(
+                      index + 1 == questions.length
+                          ? "See Score"
+                          : "Next Question",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  )),
+                ))
+              ],
+            );
+          },
         ),
       ),
     );

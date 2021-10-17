@@ -15,7 +15,7 @@ class WelcomeScreen extends StatelessWidget {
               "Xin chào mọi người !",
               style: TextStyle(fontSize: 30, color: Colors.teal),
             ),
-            Padding(padding: EdgeInsets.symmetric(vertical: 10)),
+            const Padding(padding: EdgeInsets.symmetric(vertical: 10)),
             const Text(
               "Mọi người đã sẵn sàng chưa !",
               style: TextStyle(fontSize: 18, color: Colors.tealAccent),
@@ -38,7 +38,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   TextButton(
                     style: TextButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 50),
+                      padding: const EdgeInsets.symmetric(horizontal: 50),
                     ),
                     onPressed: () {
                       Navigator.push(
